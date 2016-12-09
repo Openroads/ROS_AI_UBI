@@ -17,8 +17,34 @@ question =''
 
 
 def designateRoom():
-	if(x_ant > -1 and x_ant <3.5 and y_ant > -3 and y_ant < 1.5 ): 
+	# first row
+	if(x_ant > -1 and x_ant <= 3.5 and y_ant > -3 and y_ant <= 1.5 ): 
 		return 1;
+	if(x_ant > -6 and x_ant <= -1 and y_ant > -3 and y_ant <= 1.5 ): 
+		return 2;
+	if(x_ant > -11 and x_ant <= -6 and y_ant > -3 and y_ant <= 1.5 ): 
+		return 3;
+	if(x_ant > -16 and x_ant <= -11 and y_ant > -3 and y_ant < 1.5 ): 
+		return 4;
+	# second row
+	if(x_ant > -1 and x_ant <=3.5 and y_ant > 1.5 and y_ant <= 6.5 ): 
+		return 5;
+	if(x_ant > -6 and x_ant <= -1 and y_ant > 1.5 and y_ant <= 6.5 ): 
+		return 6;
+	if(x_ant > -11 and x_ant <= -6 and y_ant > 1.5 and y_ant <= 6.5 ): 
+		return 7;
+	if(x_ant > -16 and x_ant <= -11 and y_ant > 1.5 and y_ant <= 6.5 ): 
+		return 8;
+	#third row
+	if(x_ant > -1 and x_ant <=3.5 and y_ant > 6.5 and y_ant <= 11): 
+		return 9;
+	if(x_ant > -6 and x_ant <= -1 and y_ant > 6.5 and y_ant <= 11 ): 
+		return 10;
+	if(x_ant > -11 and x_ant <= -6 and y_ant > 6.5 and y_ant <= 11 ): 
+		return 11;
+	if(x_ant > -16 and x_ant <= -11 and y_ant > 6.5 and y_ant <= 11 ): 
+		return 12;
+
 		
 def saveObject():
 	numberRoom = designateRoom()
@@ -44,8 +70,9 @@ def callback1(data):
 	obj = data.data
 	if obj != obj_ant:
 		print "object is %s" % data.data
+		saveObject()
 	obj_ant = obj
-	saveObject()
+	
 		
 # ---------------------------------------------------------------
 # questions_keyboard callback
