@@ -6,6 +6,7 @@
 #imports
 
 #-----
+import sys;
 import rospy
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
@@ -20,12 +21,25 @@ obj_ant = ''
 
 roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
 visitedRoom =[False]*12;
+
+def showVisitedRoom():
+	print("I have already visited room: ")
+	for x in range(0,len(visitedRoom)):
+		if(visitedRoom[x] is True):
+			sys.stdout.write(str(x+1) + " ")
+			sys.stdout.flush()
+	print ""
 def answerToQuestion(question):
 	fun ={
-		
-		'i':showVisitedRoom()
+		#'b':recognizedObject,
+		'i':showVisitedRoom,
 
-	}.get(question,)
+		}
+
+	fun[question]()
+
+
+
 
 
 def designateRoom():
@@ -56,13 +70,19 @@ def designateRoom():
 		return 11;
 	if(x_ant > -16 and x_ant <= -11 and y_ant > 6.5 and y_ant <= 11 ): 
 		return 12;
-
+	return 1
 		
 def saveObject(dictionary,objectadd):
 	numberRoom = designateRoom()
 	print numberRoom
 	dictionary[numberRoom].append(objectadd);
-	print(visitedRoom);
+
+
+
+
+
+
+
 
 
 
