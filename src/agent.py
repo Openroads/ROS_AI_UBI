@@ -13,7 +13,19 @@ from nav_msgs.msg import Odometry
 x_ant = 0
 y_ant = 0
 obj_ant = ''
-question =''
+#question =''
+
+# --------------------Our implementation -------------------------	
+#g = rdflib.Graph()
+
+roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
+visitedRoom =[False]*12;
+def answerToQuestion(question):
+	fun ={
+		
+		'i':showVisitedRoom()
+
+	}.get(question,)
 
 
 def designateRoom():
@@ -46,9 +58,12 @@ def designateRoom():
 		return 12;
 
 		
-def saveObject():
+def saveObject(dictionary,objectadd):
 	numberRoom = designateRoom()
 	print numberRoom
+	dictionary[numberRoom].append(objectadd);
+	print(visitedRoom);
+
 
 
 # ---------------------------------------------------------------
@@ -60,6 +75,7 @@ def callback(data):
 	# show coordinates only when they change
 	if x != x_ant or y != y_ant:
 		print " x=%.1f y=%.1f" % (x,y)
+		visitedRoom[designateRoom()-1]=True;
 	x_ant = x
 	y_ant = y
 
@@ -70,16 +86,16 @@ def callback1(data):
 	obj = data.data
 	if obj != obj_ant:
 		print "object is %s" % data.data
-		saveObject()
+		saveObject(roomObjects,obj)
 	obj_ant = obj
 	
 		
 # ---------------------------------------------------------------
 # questions_keyboard callback
 def callback2(data):
-	global question
 	print "question is %s" % data.data
 	question = data.data
+	answerToQuestion(question);
 
 # ---------------------------------------------------------------
 def agent():
@@ -96,10 +112,7 @@ if __name__ == '__main__':
 	agent()
 
 
-# --------------------Our implementation -------------------------	
-#g = rdflib.Graph()
 
-roomObjects ={'1':[],'2':[],'3':[],'4':[],'5':[],'6':[],'7':[],'8':[],'9':[]}
 
 
 
