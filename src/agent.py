@@ -21,6 +21,22 @@ obj_ant = ''
 
 roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
 visitedRoom =[False]*12;
+lastObject =''
+
+def lastMetObject():
+	print lastObject
+	if(len(lastObject)>0):
+		print "The last saw object is: %s" % lastObject
+	else:
+		print "I haven't seen any object yet"
+
+def countRecognizedObjects():
+	counter =0;
+	for x in range(1,13):
+		objList=roomObjects[x]
+		counter=counter + len(objList)
+
+	print "I have already recognized %d objects" % counter
 
 def showVisitedRoom():
 	print("I have already visited room: ")
@@ -29,17 +45,15 @@ def showVisitedRoom():
 			sys.stdout.write(str(x+1) + " ")
 			sys.stdout.flush()
 	print ""
+
 def answerToQuestion(question):
 	fun ={
-		#'b':recognizedObject,
+		'a':lastMetObject,
+		'b':countRecognizedObjects,
 		'i':showVisitedRoom,
-
 		}
 
 	fun[question]()
-
-
-
 
 
 def designateRoom():
@@ -74,10 +88,16 @@ def designateRoom():
 		
 def saveObject(dictionary,objectadd):
 	numberRoom = designateRoom()
-	print numberRoom
-	dictionary[numberRoom].append(objectadd);
-
-
+	roomListObj = dictionary[numberRoom];
+	objectsToAdd = objectadd.split(",")
+	global lastObject
+	last = objectsToAdd[len(objectsToAdd)-1]
+	if(len(last)>1):
+		lastObject = last
+	print lastObject
+	for o in objectsToAdd:
+		if(o not in roomListObj and len(o) >1):
+			dictionary[numberRoom].append(o);
 
 
 
