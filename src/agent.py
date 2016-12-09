@@ -36,8 +36,10 @@ def countRecognizedObjects():
 		objList=roomObjects[x]
 		counter=counter + len(objList)
 
-	print "I have already recognized %d objects" % counter
-
+	if(counter>1):
+		print "I have already recognized %d objects" % counter
+	else:
+		print "I have already recognized %d object" % counter	
 def showVisitedRoom():
 	print("I have already visited room: ")
 	for x in range(0,len(visitedRoom)):
@@ -47,13 +49,16 @@ def showVisitedRoom():
 	print ""
 
 def answerToQuestion(question):
-	fun ={
+	functions ={
 		'a':lastMetObject,
 		'b':countRecognizedObjects,
 		'i':showVisitedRoom,
 		}
 
-	fun[question]()
+	fun = functions.get(question,0)
+	if(fun != 0):
+		fun()
+
 
 
 def designateRoom():
@@ -94,7 +99,6 @@ def saveObject(dictionary,objectadd):
 	last = objectsToAdd[len(objectsToAdd)-1]
 	if(len(last)>1):
 		lastObject = last
-	print lastObject
 	for o in objectsToAdd:
 		if(o not in roomListObj and len(o) >1):
 			dictionary[numberRoom].append(o);
