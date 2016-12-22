@@ -93,7 +93,7 @@ def designateRoom():
 		return 12;
 	return 1
 		
-def saveObject(dictionary,objectadd):
+def saveObject(dictionary,objectadd,x,y):
 	numberRoom = designateRoom()
 	roomListObj = dictionary[numberRoom];
 	objectsToAdd = objectadd.split(",")
@@ -102,29 +102,45 @@ def saveObject(dictionary,objectadd):
 	if(len(last)>1):
 		lastObject = last
 	for o in objectsToAdd:
+		obj = o.split("_")
 		if(o not in roomListObj and len(o) >1):
-			dictionary[numberRoom].append(o)
+			obj.append(x)
+			obj.append(y)
+			dictionary[numberRoom].append(obj)
+	
 
-def saveToCSVFile(x,y,objects):
+def saveData():
 
-	objL = objects.split(",")
-	for o in objL:
-		if(len(o) >1):
-			with open('/home/viki/catkin_ws/src/ia/output/data.csv','ab') as csvfile:
-				wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
-				data=[]
-				data.append(x) 
-				data.append(y) 
-				data.append(o)
-				wr.writerow(data)
+	with open('/home/viki/catkin_ws/src/ia/output/objects.csv','wb') as csvfile:
+		wr = csv.DictWriter(csvfile,roomObjects.keys())
+		wr.writerow(roomObjects)
+	csvfile.close()
 
 
+	with open('/home/viki/catkin_ws/src/ia/output/visited.csv','wb') as csvfile:
+		wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
+		wr.writerow(visitedRoom)
+	csvfile.close()
 
+	with open('/home/viki/catkin_ws/src/ia/output/lastobj.csv','wb') as csvfile:
+		wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
+		wr.writerow(lastObject)
+	csvfile.close()
 
+def loadData():
 
+#pozniej dodam czytanie dictionary 
 
+	with open('/home/viki/catkin_ws/src/ia/output/visited.csv', 'rb') as csvfile:
+		reader = csv.reader(csvfile, delimiter=',')
+		visitedRoom = reader.next()
+	csvfile.close()
 
-
+	with open('/home/viki/catkin_ws/src/ia/output/lastobj.csv', 'rb') as csvfile:
+		reader = csv.reader(csvfile, delimiter=',')
+		lastObject = reader.next()
+	csvfile.close()
+	
 # ---------------------------------------------------------------
 # odometry callback
 def callback(data):
@@ -146,8 +162,7 @@ def callback1(data):
 	obj = data.data
 	if obj != obj_ant:
 		print "object is %s" % data.data
-		saveObject(roomObjects,obj)
-		saveToCSVFile(x_ant,y_ant,obj)
+		saveObject(roomObjects,obj,x_ant,y_ant)
 	obj_ant = obj
 	
 		
@@ -170,7 +185,9 @@ def agent():
 
 # ---------------------------------------------------------------
 if __name__ == '__main__':
+	loadData()
 	agent()
+	saveData()
 
 
 
