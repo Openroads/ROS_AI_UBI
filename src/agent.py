@@ -6,8 +6,10 @@
 #imports
 
 #-----
-import sys;
+import sys
 import rospy
+import numpy as np
+import csv
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 
@@ -101,7 +103,20 @@ def saveObject(dictionary,objectadd):
 		lastObject = last
 	for o in objectsToAdd:
 		if(o not in roomListObj and len(o) >1):
-			dictionary[numberRoom].append(o);
+			dictionary[numberRoom].append(o)
+
+def saveToCSVFile(x,y,objects):
+
+	objL = objects.split(",")
+	for o in objL:
+		if(len(o) >1):
+			with open('/home/viki/catkin_ws/src/ia/output/data.csv','ab') as csvfile:
+				wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
+				data=[]
+				data.append(x) 
+				data.append(y) 
+				data.append(o)
+				wr.writerow(data)
 
 
 
@@ -126,11 +141,13 @@ def callback(data):
 # ---------------------------------------------------------------
 # object_recognition callback
 def callback1(data):
+	global x_ant, y_ant
 	global obj_ant
 	obj = data.data
 	if obj != obj_ant:
 		print "object is %s" % data.data
 		saveObject(roomObjects,obj)
+		saveToCSVFile(x_ant,y_ant,obj)
 	obj_ant = obj
 	
 		
