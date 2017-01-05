@@ -22,7 +22,12 @@ FILE_OBJECTS_CSV = '/home/viki/catkin_ws/src/ia/output/objects.csv'
 FILE_VISITED_CSV = '/home/viki/catkin_ws/src/ia/output/visited.csv'
 FILE_LASTOBJ_CSV = '/home/viki/catkin_ws/src/ia/output/lastobj.csv'
 
+
+### helpful global variable ###
+
 RESET_FLAG = False
+lastRoom=0
+
 
 x_ant = 0
 y_ant = 0
@@ -31,10 +36,11 @@ obj_ant = ''
 
 # --------------------Our implementation -------------------------	
 #g = rdflib.Graph()
-
+#######  stored data  ######
 roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
 visitedRoom =[False]*12
 lastObject =''
+
 
 def lastMetObject():
 	print lastObject
@@ -71,15 +77,18 @@ def countBooks():
                                 counter = counter + 1;
         if(counter>0):
                 print "I have already seen %d books" %counter
- 
         else:
                 print "I haven't seen any books yet"
 
-def getPositioOfObject(object):
+def getPositioOfObject(seachObject):
+	print roomObjects
 	for x in range(1, 13):
                 objList = roomObjects[x]
                 for n in objList:
-                        if(n[0] == 'book'):
+                        if(n[0] == seachObject):
+                        	return n[2],n[3]
+
+
 def cleanData():
 	print "Robot is reseting...."
 	global RESET_FLAG
@@ -108,38 +117,38 @@ def answerToQuestion(question):
 
 
 
-def designateRoom():
+def designateRoom(x_a,y_a):
 	# first row
-	if(x_ant > -1 and x_ant <= 3.5 and y_ant > -3 and y_ant <= 1.5 ): 
+	if(x_a > -1 and x_a <= 3.5 and y_a > -3 and y_a <= 1.5 ): 
 		return 1;
-	if(x_ant > -6 and x_ant <= -1 and y_ant > -3 and y_ant <= 1.5 ): 
+	if(x_a > -6 and x_a <= -1 and y_a > -3 and y_a <= 1.5 ): 
 		return 2;
-	if(x_ant > -11 and x_ant <= -6 and y_ant > -3 and y_ant <= 1.5 ): 
+	if(x_a > -11 and x_a <= -6 and y_a > -3 and y_a <= 1.5 ): 
 		return 3;
-	if(x_ant > -16 and x_ant <= -11 and y_ant > -3 and y_ant < 1.5 ): 
+	if(x_a > -16 and x_a <= -11 and y_a > -3 and y_a < 1.5 ): 
 		return 4;
 	# second row
-	if(x_ant > -1 and x_ant <=3.5 and y_ant > 1.5 and y_ant <= 6.5 ): 
+	if(x_a > -1 and x_a <=3.5 and y_a > 1.5 and y_a <= 6.5 ): 
 		return 5;
-	if(x_ant > -6 and x_ant <= -1 and y_ant > 1.5 and y_ant <= 6.5 ): 
+	if(x_a > -6 and x_a <= -1 and y_a > 1.5 and y_a <= 6.5 ): 
 		return 6;
-	if(x_ant > -11 and x_ant <= -6 and y_ant > 1.5 and y_ant <= 6.5 ): 
+	if(x_a > -11 and x_a <= -6 and y_a > 1.5 and y_a <= 6.5 ): 
 		return 7;
-	if(x_ant > -16 and x_ant <= -11 and y_ant > 1.5 and y_ant <= 6.5 ): 
+	if(x_a > -16 and x_a <= -11 and y_a > 1.5 and y_a <= 6.5 ): 
 		return 8;
 	#third row
-	if(x_ant > -1 and x_ant <=3.5 and y_ant > 6.5 and y_ant <= 11): 
+	if(x_a > -1 and x_a <=3.5 and y_a > 6.5 and y_a <= 11): 
 		return 9;
-	if(x_ant > -6 and x_ant <= -1 and y_ant > 6.5 and y_ant <= 11 ): 
+	if(x_a > -6 and x_a <= -1 and y_a > 6.5 and y_a <= 11 ): 
 		return 10;
-	if(x_ant > -11 and x_ant <= -6 and y_ant > 6.5 and y_ant <= 11 ): 
+	if(x_a > -11 and x_a <= -6 and y_a > 6.5 and y_a <= 11 ): 
 		return 11;
-	if(x_ant > -16 and x_ant <= -11 and y_ant > 6.5 and y_ant <= 11 ): 
+	if(x_a > -16 and x_a <= -11 and y_a > 6.5 and y_a <= 11 ): 
 		return 12;
 	return 1
 		
 def saveObject(dictionary,objectadd,x,y):
-	numberRoom = designateRoom()
+	numberRoom = designateRoom(x,y)
 	roomListObj = dictionary[numberRoom];
 	objectsToAdd = objectadd.split(",")
 	global lastObject
@@ -224,7 +233,8 @@ def callback(data):
 	# show coordinates only when they change
 	if x != x_ant or y != y_ant:
 		print " x=%.1f y=%.1f" % (x,y)
-		visitedRoom[designateRoom()-1]=True;
+		visitedRoom[designateRoom(x,y)-1]=True;
+		lastRoom = designateRoom(x,y)
 	x_ant = x
 	y_ant = y
 
