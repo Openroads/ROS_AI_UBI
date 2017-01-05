@@ -10,8 +10,19 @@ import sys
 import rospy
 import numpy as np
 import csv
+import ast
+import os.path
+import os
+
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
+
+#########       Paths for filename :    ########
+FILE_OBJECTS_CSV = '/home/viki/catkin_ws/src/ia/output/objects.csv'
+FILE_VISITED_CSV = '/home/viki/catkin_ws/src/ia/output/visited.csv'
+FILE_LASTOBJ_CSV = '/home/viki/catkin_ws/src/ia/output/lastobj.csv'
+
+RESET_FLAG = False
 
 x_ant = 0
 y_ant = 0
@@ -22,7 +33,7 @@ obj_ant = ''
 #g = rdflib.Graph()
 
 roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
-visitedRoom =[False]*12;
+visitedRoom =[False]*12
 lastObject =''
 
 def lastMetObject():
@@ -37,11 +48,12 @@ def countRecognizedObjects():
 	for x in range(1,13):
 		objList=roomObjects[x]
 		counter=counter + len(objList)
-
+	print roomObjects
 	if(counter>1):
 		print "I have already recognized %d objects" % counter
 	else:
-		print "I have already recognized %d object" % counter	
+		print "I have already recognized %d object" % counter
+
 def showVisitedRoom():
 	print("I have already visited room: ")
 	for x in range(0,len(visitedRoom)):
@@ -49,12 +61,45 @@ def showVisitedRoom():
 			sys.stdout.write(str(x+1) + " ")
 			sys.stdout.flush()
 	print ""
+#How many books did you found
+def countBooks():
+        counter = 0;
+        for x in range(1, 13):
+                objList = roomObjects[x]
+                for n in objList:
+                        if(n[0] == 'book'):
+                                counter = counter + 1;
+        if(counter>0):
+                print "I have already seen %d books" %counter
+ 
+        else:
+                print "I haven't seen any books yet"
 
+def getPositioOfObject(object):
+	for x in range(1, 13):
+                objList = roomObjects[x]
+                for n in objList:
+                        if(n[0] == 'book'):
+def cleanData():
+	print "Robot is reseting...."
+	global RESET_FLAG
+	RESET_FLAG = True
+	if(os.path.exists(FILE_VISITED_CSV)  and os.path.exists(FILE_OBJECTS_CSV) and os.path.exists(FILE_LASTOBJ_CSV)):
+		os.remove(FILE_OBJECTS_CSV)
+		os.remove(FILE_VISITED_CSV)
+		os.remove(FILE_LASTOBJ_CSV)
+	roomObjects ={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
+	print 'Reseted.\n'
+	os.system('kill $PPID')
+	print "Run agent again."
+	
 def answerToQuestion(question):
 	functions ={
 		'a':lastMetObject,
 		'b':countRecognizedObjects,
 		'i':showVisitedRoom,
+		'e':countBooks,
+		'#':cleanData,
 		}
 
 	fun = functions.get(question,0)
@@ -102,44 +147,73 @@ def saveObject(dictionary,objectadd,x,y):
 	if(len(last)>1):
 		lastObject = last
 	for o in objectsToAdd:
-		obj = o.split("_")
-		if(o not in roomListObj and len(o) >1):
+		if(len(o) > 1):
+			obj = o.split("_")
+			category=obj.pop(0)
+			objstr=''
+			for e in obj:
+				objstr +=e+" "
+			
+			for roomobj in roomListObj:
+				if(objstr in roomobj):
+					return
+			objPut =[category,objstr,x,y]		
 			obj.append(x)
 			obj.append(y)
-			dictionary[numberRoom].append(obj)
-	
+			dictionary[numberRoom].append(objPut)
+
 
 def saveData():
-
-	with open('/home/viki/catkin_ws/src/ia/output/objects.csv','wb') as csvfile:
-		wr = csv.DictWriter(csvfile,roomObjects.keys())
+	print "Save data to files....."
+	with open(FILE_OBJECTS_CSV,'wb') as csvfile:
+		wr = csv.DictWriter(csvfile,fieldnames=roomObjects.keys())
 		wr.writerow(roomObjects)
 	csvfile.close()
 
 
-	with open('/home/viki/catkin_ws/src/ia/output/visited.csv','wb') as csvfile:
+	with open(FILE_VISITED_CSV,'wb') as csvfile:
 		wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
 		wr.writerow(visitedRoom)
 	csvfile.close()
 
-	with open('/home/viki/catkin_ws/src/ia/output/lastobj.csv','wb') as csvfile:
+	with open(FILE_LASTOBJ_CSV,'wb') as csvfile:
 		wr = csv.writer(csvfile,delimiter=",",quoting=csv.QUOTE_NONE)
 		wr.writerow(lastObject)
 	csvfile.close()
 
-def loadData():
+	print "Finish."
+	print "Shutting down..."
+	print "Agent switched off."
 
-#pozniej dodam czytanie dictionary 
-
-	with open('/home/viki/catkin_ws/src/ia/output/visited.csv', 'rb') as csvfile:
+def loadData(roomObjects,visitedRoom,lastObject):
+	print "Load data from files......"
+#read rooms with encountered objects
+	with open(FILE_OBJECTS_CSV,'rb') as csvfile:
+		reader = csv.DictReader(csvfile,fieldnames =roomObjects.keys())
+		
+		for row in reader:
+			roomObjectsfile = row
+		for x in roomObjectsfile:
+			roomObjects[x] = ast.literal_eval(roomObjectsfile[x])
+			#print roomObjects
+# read visited room
+	with open(FILE_VISITED_CSV, 'rb') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',')
-		visitedRoom = reader.next()
+		statusArray = reader.next()
+		for x in range(0,len(statusArray)):
+			if statusArray[x] == 'True':
+				visitedRoom[x] = True
+			elif statusArray[x] == 'False':
+				visitedRoom[x] = False
+			else:
+			 print "Incorect data in visited.csv file. "
 	csvfile.close()
 
-	with open('/home/viki/catkin_ws/src/ia/output/lastobj.csv', 'rb') as csvfile:
+	with open(FILE_LASTOBJ_CSV, 'rb') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',')
 		lastObject = reader.next()
 	csvfile.close()
+
 	
 # ---------------------------------------------------------------
 # odometry callback
@@ -163,6 +237,7 @@ def callback1(data):
 	if obj != obj_ant:
 		print "object is %s" % data.data
 		saveObject(roomObjects,obj,x_ant,y_ant)
+		print roomObjects
 	obj_ant = obj
 	
 		
@@ -185,9 +260,16 @@ def agent():
 
 # ---------------------------------------------------------------
 if __name__ == '__main__':
-	loadData()
-	agent()
-	saveData()
+	if(os.path.exists('/home/viki/catkin_ws/src/ia/output/')):
+		if(os.path.exists(FILE_VISITED_CSV)  and os.path.exists(FILE_OBJECTS_CSV) and os.path.exists(FILE_LASTOBJ_CSV)):
+			loadData(roomObjects,visitedRoom,lastObject)
+		
+		agent()
+		if(not RESET_FLAG):
+			saveData()
+	
+	else:
+		print 'Create a directory with name "output" inside src/ia/ folder. The file path should be: "/home/viki/catkin_ws/src/ia/output/ . \nIt is neccesary to store the data collected by agent.'
 
 
 
