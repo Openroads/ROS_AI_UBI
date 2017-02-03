@@ -28,7 +28,11 @@ def questions():
 	print '  n-Do you think Mary prefers Apple or Windows computers?'
 	print '  o-Do I need to pass by room 7 to go to room 9?'
 	print '  p-What rooms must I pass to go to a computer lab?'
- 
+	print '  q-What is the shortest path what I must pass to go to computer lab ?' 
+	print '  r-What is the shortest path what I must pass to find  book sports illustrated review ?' 
+	print '  s-What do you know about objects in every room ?'
+	print '  t-Show known door'
+	print '  #-To restet the robot'
 	tty.setcbreak(sys.stdin)
 
 	while not rospy.is_shutdown():
